@@ -27,7 +27,6 @@ PLOT_PROB_THRESH = 0.4
 # EPSILON = 1e-16
 
 ANCHORS_PER_GRID = 9
-ANCHOR_SIZE = 4
 # ANCHOR_SHAPE = [36, 37, 366, 174, 115, 59,
 #                 162, 87, 38, 90, 258, 173,
 #                 224, 108, 78, 170, 72, 43]
