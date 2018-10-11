@@ -74,7 +74,7 @@ CLASS_NAMES = ["person", "car", "riding", "boat", "drone", "truck", "parachute",
 
 E = 2.718281828
 
-def parse_tensor_str(tensor_str):
+def parse_tensor_str(tensor_str, data_type=float):
     strre = r'(?<=\d)(?=\s)'
     parsed_str = re.sub(strre, ',', tensor_str)
     strre = r'\](\s*)\['
@@ -82,7 +82,7 @@ def parse_tensor_str(tensor_str):
     if m:
         parsed_str = re.sub(strre, '],' + m.group(1) + '[', parsed_str)
     tensor = eval(parsed_str)
-    return tensor
+    return np.array(tensor, dtype=data_type)
 
 def safe_exp(w):
     if w < 1:
@@ -132,9 +132,12 @@ def feature_express_c(feature_map, img_width, img_height):
     lib.preprocess.restype = c_void_p
     tensors = lib.preprocess()
     result = (c_float*4)()
+    start = time.time()
     lib.feature_express(feature_map.ctypes.data_as(c_void_p), img_width, img_height, tensors, result)
+    end = time.time()
+    print ("time of feature_express: %fms"%((end - start)*1000))
     lib.postprocess(tensors)
-    bbox = []*4
+    bbox = np.zeros(4)
     bbox[0] = result[0]
     bbox[1] = result[1]
     bbox[2] = result[2]
@@ -145,7 +148,7 @@ def test_with_file(filename, img_width, img_height):
     try:
         fo = open(filename)
         fstr = fo.read()
-        tensor = parse_tensor_str(fstr)
+        tensor = parse_tensor_str(fstr, data_type=np.int16)
     except IOError:
         print ("No such file: " + filename)
     finally:
@@ -153,12 +156,9 @@ def test_with_file(filename, img_width, img_height):
     # print(tensor)
     # print(np.shape(tensor))
     tensor = np.reshape(tensor, (144, 23, 40))
-    start = time.time()
-    bbox = feature_express(tensor, img_width, img_height)
-    end = time.time()
+    bbox = feature_express_c(tensor, img_width, img_height)
     print ("predict:")
     print (bbox)
-    print ("time of feature_express: %fms"%((end - start)*1000))
     return bbox
 
 if __name__ == '__main__':

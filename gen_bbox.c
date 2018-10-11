@@ -39,7 +39,6 @@ struct pre_alloc_tensors {
      tl_tensor *conf_workspace, *bbox_workspace;
      tl_tensor *conf_max, *conf_maxidx;
      tl_tensor *bbox_int16, *bbox_float, *anchor;
-     tl_tensor *bbox_final;
 };
 
 struct pre_alloc_tensors *preprocess(void)
@@ -56,32 +55,31 @@ struct pre_alloc_tensors *preprocess(void)
      tensors->bbox_workspace = tl_tensor_zeros(1, ARR(int,tensors->bbox_transpose->ndim*tensors->bbox_transpose->len*2), TL_INT32);
      tensors->conf_max = tl_tensor_zeros(1, ARR(int,1), TL_INT16);
      tensors->conf_maxidx = tl_tensor_zeros(1, ARR(int,1), TL_INT32);
-     tensors->bbox_int16 = tl_tensor_zeros(1, ARR(int,4), TL_INT16);
-     tensors->bbox_float = tl_tensor_zeros(1, ARR(int,4), TL_FLOAT);
-     tensors->anchor = tl_tensor_zeros(1, ARR(int,4), TL_FLOAT);
-     tensors->bbox_final = tl_tensor_zeros(1, ARR(int,4), TL_FLOAT);
+     tensors->bbox_int16 = tl_tensor_zeros(2, ARR(int,1,4), TL_INT16);
+     tensors->bbox_float = tl_tensor_zeros(2, ARR(int,1,4), TL_FLOAT);
+     tensors->anchor = tl_tensor_zeros(2, ARR(int,1,4), TL_FLOAT);
 
      tl_tensor *anchor_shapes = tl_tensor_create(ANCHOR_SHAPES, 2, ARR(int,ANCHORS_PER_GRID,2), TL_FLOAT);
      tl_tensor *all_anchor_shapes = tl_tensor_repeat(anchor_shapes, CONVOUT_H*CONVOUT_W);
-     tl_tensor_reshape(all_anchor_shapes, 4, ARR(int,CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,2));
+     tl_tensor_reshape_src(all_anchor_shapes, 4, ARR(int,CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,2));
 
      tl_tensor *center_x_conv = tl_tensor_arange(1, CONVOUT_W+1, 1, TL_FLOAT);
      tl_tensor *center_x_input = tl_tensor_elew_param(center_x_conv, (float)INPUT_W/((float)CONVOUT_W+1), NULL, TL_MUL);
      tl_tensor *center_x_input_all = tl_tensor_repeat(center_x_input, CONVOUT_H*ANCHORS_PER_GRID);
-     tl_tensor_reshape(center_x_input_all, 3, ARR(int,ANCHORS_PER_GRID,CONVOUT_H,CONVOUT_W));
+     tl_tensor_reshape_src(center_x_input_all, 3, ARR(int,ANCHORS_PER_GRID,CONVOUT_H,CONVOUT_W));
      tl_tensor *center_x_input_all_trans = tl_tensor_transpose(center_x_input_all, NULL, ARR(int,1,2,0), NULL);
-     tl_tensor_reshape(center_x_input_all_trans, 4, ARR(int,CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1));
+     tl_tensor_reshape_src(center_x_input_all_trans, 4, ARR(int,CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1));
 
      tl_tensor *center_y_conv = tl_tensor_arange(1, CONVOUT_H+1, 1, TL_FLOAT);
      tl_tensor *center_y_input = tl_tensor_elew_param(center_y_conv, (float)INPUT_H/((float)CONVOUT_H+1), NULL, TL_MUL);
      tl_tensor *center_y_input_all = tl_tensor_repeat(center_y_input, CONVOUT_W*ANCHORS_PER_GRID);
-     tl_tensor_reshape(center_y_input_all, 3, ARR(int,ANCHORS_PER_GRID,CONVOUT_W,CONVOUT_H));
+     tl_tensor_reshape_src(center_y_input_all, 3, ARR(int,ANCHORS_PER_GRID,CONVOUT_W,CONVOUT_H));
      tl_tensor *center_y_input_all_trans = tl_tensor_transpose(center_y_input_all, NULL, ARR(int,2,1,0), NULL);
-     tl_tensor_reshape(center_y_input_all_trans, 4, ARR(int,CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1));
+     tl_tensor_reshape_src(center_y_input_all_trans, 4, ARR(int,CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1));
 
      tl_tensor *concat1 = tl_tensor_concat(center_x_input_all_trans, center_y_input_all_trans, NULL, 3);
      tl_tensor *concat2 = tl_tensor_concat(concat1, all_anchor_shapes, NULL, 3);
-     tl_tensor_reshape(concat2, 2, ARR(int,concat2->len/4,4));
+     tl_tensor_reshape_src(concat2, 2, ARR(int,concat2->len/4,4));
 
      tensors->anchors = concat2;
      tl_tensor_free(anchor_shapes);
@@ -103,7 +101,6 @@ void postprocess(struct pre_alloc_tensors *tensors)
 {
      tl_tensor_free_data_too(tensors->anchors);
      tl_tensor_free_data_too(tensors->bbox_feature);
-     tl_tensor_free_data_too(tensors->bbox_final);
      tl_tensor_free_data_too(tensors->bbox_transpose);
      tl_tensor_free_data_too(tensors->bbox_workspace);
      tl_tensor_free_data_too(tensors->conf_feature);
@@ -157,12 +154,12 @@ void feature_express(int16_t *feature, int img_width, int img_height,
      tensors->feature->data = feature;
      tl_tensor_slice(tensors->feature, tensors->conf_feature, 0, CLASS_SLICE_C, CONF_SLICE_C);
      tl_tensor_slice(tensors->feature, tensors->bbox_feature, 0, CLASS_SLICE_C+CONF_SLICE_C, BBOX_SLICE_C);
-     tl_tensor_reshape(tensors->conf_feature, 4, ARR(int,ANCHORS_PER_GRID,1,CONVOUT_H,CONVOUT_W));
-     tl_tensor_reshape(tensors->bbox_feature, 4, ARR(int,ANCHORS_PER_GRID,4,CONVOUT_H,CONVOUT_W));
+     tl_tensor_reshape_src(tensors->conf_feature, 4, ARR(int,ANCHORS_PER_GRID,1,CONVOUT_H,CONVOUT_W));
+     tl_tensor_reshape_src(tensors->bbox_feature, 4, ARR(int,ANCHORS_PER_GRID,4,CONVOUT_H,CONVOUT_W));
      tl_tensor_transpose(tensors->conf_feature, tensors->conf_transpose, ARR(int,2,3,0,1), tensors->conf_workspace);;
      tl_tensor_transpose(tensors->bbox_feature, tensors->bbox_transpose, ARR(int,2,3,0,1), tensors->bbox_workspace);;
-     tl_tensor_reshape(tensors->conf_transpose, 2, ARR(int,tensors->conf_transpose->len,1));
-     tl_tensor_reshape(tensors->bbox_transpose, 2, ARR(int,tensors->bbox_transpose->len/4,4));
+     tl_tensor_reshape_src(tensors->conf_transpose, 2, ARR(int,tensors->conf_transpose->len,1));
+     tl_tensor_reshape_src(tensors->bbox_transpose, 2, ARR(int,tensors->bbox_transpose->len/4,4));
      tl_tensor_maxreduce(tensors->conf_transpose, tensors->conf_max, tensors->conf_maxidx, 0);
      tl_tensor_slice(tensors->bbox_transpose, tensors->bbox_int16, 0, *(int32_t*)tensors->conf_maxidx->data, 1);
      tl_tensor_slice(tensors->anchors, tensors->anchor, 0, *(int32_t*)tensors->conf_maxidx->data, 1);
