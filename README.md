@@ -3,8 +3,8 @@
 C functions to generate the bounding box from a feature map.
 
 ## Prerequisites
-This requires library *Tensorlight* to execute tensor computation.
-Check [Tensorlight](https://github.com/zhaozhixu/TensorLight) for installation guide.
+This requires library *TensorLight* to execute tensor computation.
+Check [TensorLight](https://github.com/zhaozhixu/TensorLight) for installation guide.
 
 ## Build for test
 Use `make` in this folder to compile the shared library `libgen_bbox.so`,
