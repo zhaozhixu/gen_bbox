@@ -9,6 +9,6 @@ test:
 	@echo "test with test/convoutTensor_10001.txt "
 	@echo "expect:"
 	@echo "[ 312.12 168.34 368.83 225.64 ]"
-	@python gen_bbox.py test/convoutTensor_10001.txt 640 360
+	@python test/gen_bbox.py test/convoutTensor_10001.txt 640 360
 clean:
 	rm -f libgen_bbox.so
