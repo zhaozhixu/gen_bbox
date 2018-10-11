@@ -1,8 +1,11 @@
+#! /usr/bin/python
+
 import numpy as np
 import re
 import os
 import sys
 import time
+from ctypes import *
 
 INPUT_C = 3
 INPUT_H = 368
@@ -124,6 +127,20 @@ def feature_express(feature_map, img_width, img_height):
 
     return bbox_final
 
+def feature_express_c(feature_map, img_width, img_height):
+    lib = CDLL("./libgen_bbox.so")
+    lib.preprocess.restype = c_void_p
+    tensors = lib.preprocess()
+    result = (c_float*4)()
+    lib.feature_express(feature_map.ctypes.data_as(c_void_p), img_width, img_height, tensors, result)
+    lib.postprocess(tensors)
+    bbox = []*4
+    bbox[0] = result[0]
+    bbox[1] = result[1]
+    bbox[2] = result[2]
+    bbox[3] = result[3]
+    return bbox
+
 def test_with_file(filename, img_width, img_height):
     try:
         fo = open(filename)
@@ -139,6 +156,8 @@ def test_with_file(filename, img_width, img_height):
     start = time.time()
     bbox = feature_express(tensor, img_width, img_height)
     end = time.time()
+    print ("predict:")
+    print (bbox)
     print ("time of feature_express: %fms"%((end - start)*1000))
     return bbox
 
@@ -147,4 +166,3 @@ if __name__ == '__main__':
     img_width = sys.argv[2]
     img_height = sys.argv[3]
     bbox = test_with_file(filename, int(img_width), int(img_height))
-    print (bbox)
