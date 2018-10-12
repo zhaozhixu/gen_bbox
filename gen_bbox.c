@@ -36,6 +36,7 @@ struct pre_alloc_tensors {
      tl_tensor *conf_workspace, *bbox_workspace;
      tl_tensor *conf_max, *conf_maxidx;
      tl_tensor *bbox_int16, *bbox_float, *anchor;
+     int volumn_slice_feature, volumn_slice_bbox;
 };
 
 struct pre_alloc_tensors *gb_preprocess(void)
@@ -46,16 +47,16 @@ struct pre_alloc_tensors *gb_preprocess(void)
      int dims_feature[] = {CONVOUT_C,CONVOUT_H,CONVOUT_W};
      tensors->feature = tl_tensor_create(NULL, 3, dims_feature, TL_INT16);
      int dims_conf_feature[] = {CONF_SLICE_C,CONVOUT_H,CONVOUT_W};
-     tensors->conf_feature = tl_tensor_zeros(3, dims_conf_feature, TL_INT16);
+     tensors->conf_feature = tl_tensor_create(NULL, 3, dims_conf_feature, TL_INT16);
      int dims_bbox_feature[] = {BBOX_SLICE_C,CONVOUT_H,CONVOUT_W};
-     tensors->bbox_feature = tl_tensor_zeros(3, dims_bbox_feature, TL_INT16);
+     tensors->bbox_feature = tl_tensor_create(NULL, 3, dims_bbox_feature, TL_INT16);
      int dims_zeros_conf[] = {CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1};
      tensors->conf_transpose = tl_tensor_zeros(4, dims_zeros_conf, TL_INT16);
      int dims_zeros_bbox[] = {CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,4};
      tensors->bbox_transpose = tl_tensor_zeros(4, dims_zeros_bbox, TL_INT16);
-     int dims_zeros_confwk[] = {tensors->conf_transpose->ndim*tensors->conf_transpose->len*2};
+     int dims_zeros_confwk[] = {tensors->conf_transpose->ndim*(tensors->conf_transpose->len*2+2)};
      tensors->conf_workspace = tl_tensor_zeros(1, dims_zeros_confwk, TL_INT32);
-     int dims_zeros_bboxwk[] = {tensors->bbox_transpose->ndim*tensors->bbox_transpose->len*2};
+     int dims_zeros_bboxwk[] = {tensors->bbox_transpose->ndim*(tensors->bbox_transpose->len*2+2)};
      tensors->bbox_workspace = tl_tensor_zeros(1, dims_zeros_bboxwk, TL_INT32);
      int dims_zeros_conf_max[] = {1};
      tensors->conf_max = tl_tensor_zeros(1, dims_zeros_conf_max, TL_INT16);
@@ -67,6 +68,13 @@ struct pre_alloc_tensors *gb_preprocess(void)
      tensors->bbox_float = tl_tensor_zeros(2, dims_zeros_bbox_float, TL_FLOAT);
      int dims_zeros_anchor[] = {1,4};
      tensors->anchor = tl_tensor_zeros(2, dims_zeros_anchor, TL_FLOAT);
+
+     tensors->volumn_slice_feature = 1;
+     for (int i = 1; i < tensors->feature->ndim; i++)
+          tensors->volumn_slice_feature *= tensors->feature->dims[i];
+     tensors->volumn_slice_bbox = 1;
+     for (int i = 1; i < tensors->bbox_transpose->ndim; i++)
+          tensors->volumn_slice_bbox *= tensors->bbox_transpose->dims[i];
 
      int dims_create_anchor[] = {ANCHORS_PER_GRID,2};
      tl_tensor *anchor_shapes = tl_tensor_create(ANCHOR_SHAPES, 2, dims_create_anchor, TL_FLOAT);
@@ -118,10 +126,10 @@ struct pre_alloc_tensors *gb_preprocess(void)
 void gb_postprocess(struct pre_alloc_tensors *tensors)
 {
      tl_tensor_free_data_too(tensors->anchors);
-     tl_tensor_free_data_too(tensors->bbox_feature);
+     tl_tensor_free(tensors->bbox_feature);
      tl_tensor_free_data_too(tensors->bbox_transpose);
      tl_tensor_free_data_too(tensors->bbox_workspace);
-     tl_tensor_free_data_too(tensors->conf_feature);
+     tl_tensor_free(tensors->conf_feature);
      tl_tensor_free_data_too(tensors->conf_transpose);
      tl_tensor_free_data_too(tensors->conf_workspace);
      tl_tensor_free_data_too(tensors->conf_max);
@@ -170,8 +178,8 @@ void gb_getbbox(int16_t *feature, int img_width, int img_height,
                 struct pre_alloc_tensors *tensors, float *result)
 {
      tensors->feature->data = feature;
-     tl_tensor_slice(tensors->feature, tensors->conf_feature, 0, CLASS_SLICE_C, CONF_SLICE_C);
-     tl_tensor_slice(tensors->feature, tensors->bbox_feature, 0, CLASS_SLICE_C+CONF_SLICE_C, BBOX_SLICE_C);
+     tensors->conf_feature->data = &((int16_t*)tensors->feature->data)[CLASS_SLICE_C*tensors->volumn_slice_feature];
+     tensors->bbox_feature->data = &((int16_t*)tensors->feature->data)[(CLASS_SLICE_C+CONF_SLICE_C)*tensors->volumn_slice_feature];
      int dims_reshape_conf[] = {ANCHORS_PER_GRID,1,CONVOUT_H,CONVOUT_W};
      tl_tensor_reshape_src(tensors->conf_feature, 4, dims_reshape_conf);
      int dims_reshape_bbox[] = {ANCHORS_PER_GRID,4,CONVOUT_H,CONVOUT_W};
