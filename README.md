@@ -22,11 +22,11 @@ int img_width, img_height; /* original image size */
 float bbox[4]; /* bounding box */
 struct pre_alloc_tensors *tensors;
 
-tensors = preprocess(); /* create necessary tensors */
+tensors = gb_preprocess(); /* create necessary tensors */
 
 feature_map = ...... /* compute feature_map */
-feature_express(feature_map, img_width, img_height, tensors, bbox); /* get bbox */
+gb_getbbox(feature_map, img_width, img_height, tensors, bbox); /* get bbox */
 
-postprocess(tensors); /* release tensors */
+gb_postprocess(tensors); /* release tensors */
 
 ```
