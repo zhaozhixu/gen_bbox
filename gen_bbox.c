@@ -41,7 +41,7 @@ struct pre_alloc_tensors {
      tl_tensor *bbox_int16, *bbox_float, *anchor;
 };
 
-struct pre_alloc_tensors *preprocess(void)
+struct pre_alloc_tensors *gb_preprocess(void)
 {
      struct pre_alloc_tensors *tensors;
 
@@ -97,7 +97,7 @@ struct pre_alloc_tensors *preprocess(void)
      return tensors;
 }
 
-void postprocess(struct pre_alloc_tensors *tensors)
+void gb_postprocess(struct pre_alloc_tensors *tensors)
 {
      tl_tensor_free_data_too(tensors->anchors);
      tl_tensor_free_data_too(tensors->bbox_feature);
@@ -148,8 +148,8 @@ static void transform_bbox(float *bbox_delta, float *anchor, float *result,
      result[3] = ymax;
 }
 
-void feature_express(int16_t *feature, int img_width, int img_height,
-                     struct pre_alloc_tensors *tensors, float *result)
+void gb_getbbox(int16_t *feature, int img_width, int img_height,
+                struct pre_alloc_tensors *tensors, float *result)
 {
      tensors->feature->data = feature;
      tl_tensor_slice(tensors->feature, tensors->conf_feature, 0, CLASS_SLICE_C, CONF_SLICE_C);

@@ -129,14 +129,14 @@ def feature_express(feature_map, img_width, img_height):
 
 def feature_express_c(feature_map, img_width, img_height):
     lib = CDLL("./libgen_bbox.so")
-    lib.preprocess.restype = c_void_p
-    tensors = lib.preprocess()
+    lib.gb_preprocess.restype = c_void_p
+    tensors = lib.gb_preprocess()
     result = (c_float*4)()
     start = time.time()
-    lib.feature_express(feature_map.ctypes.data_as(c_void_p), img_width, img_height, tensors, result)
+    lib.gb_getbbox(feature_map.ctypes.data_as(c_void_p), img_width, img_height, tensors, result)
     end = time.time()
     print ("time of feature_express: %fms"%((end - start)*1000))
-    lib.postprocess(tensors)
+    lib.gb_postprocess(tensors)
     bbox = np.zeros(4)
     bbox[0] = result[0]
     bbox[1] = result[1]
