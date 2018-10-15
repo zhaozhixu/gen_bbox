@@ -2,3 +2,7 @@
 *.o
 *.so
 *.out
+*.pyc
+*.data
+*.old
+test/gen_bbox_test

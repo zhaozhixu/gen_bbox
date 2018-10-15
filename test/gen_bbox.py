@@ -135,13 +135,15 @@ def feature_express_c(feature_map, img_width, img_height):
     start = time.time()
     lib.gb_getbbox(feature_map.ctypes.data_as(c_void_p), img_width, img_height, tensors, result)
     end = time.time()
-    print ("time of feature_express: %fms"%((end - start)*1000))
     lib.gb_postprocess(tensors)
     bbox = np.zeros(4)
     bbox[0] = result[0]
     bbox[1] = result[1]
     bbox[2] = result[2]
     bbox[3] = result[3]
+    print ("predict:")
+    print bbox
+    print ("time: %.3fms"%((end - start)*1000))
     return bbox
 
 def test_with_file(filename, img_width, img_height):
@@ -157,8 +159,8 @@ def test_with_file(filename, img_width, img_height):
     # print(np.shape(tensor))
     tensor = np.reshape(tensor, (144, 23, 40))
     bbox = feature_express_c(tensor, img_width, img_height)
-    print ("predict:")
-    print (bbox)
+    # print ("predict:")
+    # print (bbox)
     return bbox
 
 if __name__ == '__main__':
