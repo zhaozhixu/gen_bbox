@@ -48,6 +48,7 @@ int main(int argc, char **argv)
      if (status < 0)
           exit(EXIT_FAILURE);
      memset(cmd, 0, sizeof(char)*100);
+
      sprintf(cmd, "sed -i 's,\\[,,g' %s", filecp);
      status = system(cmd);
      if (status < 0)

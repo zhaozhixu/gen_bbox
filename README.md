@@ -7,8 +7,7 @@ This requires library *TensorLight* to execute tensor computation.
 Check [TensorLight](https://github.com/zhaozhixu/TensorLight) for installation guide.
 
 ## Build for test
-Use `make` in this folder to compile the shared library `libgen_bbox.so`,
-then do the test.
+Use `make` in this folder to compile test program then do the test.
 
 ## Usage
 Copy `gen_bbox.h` and `gen_bbox.c` in your project to use the functions.
