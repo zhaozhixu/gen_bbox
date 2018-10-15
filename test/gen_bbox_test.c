@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 
      printf("predict:\n[ ");
      for (i = 0; i < 4; i++) {
-          printf("%f ", bbox[i]);
+          printf("%.2f ", bbox[i]);
      }
      printf("]\n");
      printf("time: %.3fms\n", (float)(end - start)/CLOCKS_PER_SEC*1000);
