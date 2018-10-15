@@ -5,7 +5,7 @@ all: target test
 target: gen_bbox.c
 	@echo "Compiling..."
 # @gcc -Wall -fPIC -shared -O3 -g gen_bbox.c -o libgen_bbox.so `pkg-config --libs --cflags tensorlight`
-	@gcc -Wall -g -O0 test/gen_bbox_test.c gen_bbox.c -o test/gen_bbox_test `pkg-config --libs --cflags tensorlight`
+	@gcc -Wall -O3 -Wno-unused-result test/gen_bbox_test.c gen_bbox.c -o test/gen_bbox_test `pkg-config --libs --cflags tensorlight`
 
 test:
 	@echo "test with test/convoutTensor_10001.txt "
