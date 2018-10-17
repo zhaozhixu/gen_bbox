@@ -43,11 +43,11 @@ struct pre_alloc_tensors *gb_preprocess(void)
 
      tensors = (struct pre_alloc_tensors *)tl_alloc(sizeof(struct pre_alloc_tensors));
      int dims_feature[] = {CONVOUT_C,CONVOUT_H,CONVOUT_W};
-     tensors->feature = tl_tensor_create(NULL, 3, dims_feature, TL_INT16, 0);
+     tensors->feature = tl_tensor_create(NULL, 3, dims_feature, TL_INT16);
      int dims_conf_feature[] = {CONF_SLICE_C,CONVOUT_H,CONVOUT_W};
-     tensors->conf_feature = tl_tensor_create(NULL, 3, dims_conf_feature, TL_INT16, 0);
+     tensors->conf_feature = tl_tensor_create(NULL, 3, dims_conf_feature, TL_INT16);
      int dims_bbox_feature[] = {BBOX_SLICE_C,CONVOUT_H,CONVOUT_W};
-     tensors->bbox_feature = tl_tensor_create(NULL, 3, dims_bbox_feature, TL_INT16, 0);
+     tensors->bbox_feature = tl_tensor_create(NULL, 3, dims_bbox_feature, TL_INT16);
      int dims_zeros_conf_max[] = {1};
      tensors->conf_max = tl_tensor_zeros(1, dims_zeros_conf_max, TL_INT16);
      int dims_zeros_conf_maxidx[] = {1};
@@ -64,7 +64,7 @@ struct pre_alloc_tensors *gb_preprocess(void)
           tensors->volumn_slice_feature *= tensors->feature->dims[i];
 
      int dims_create_anchor[] = {ANCHORS_PER_GRID,2};
-     tl_tensor *anchor_shapes = tl_tensor_create(ANCHOR_SHAPES, 2, dims_create_anchor, TL_FLOAT, 0);
+     tl_tensor *anchor_shapes = tl_tensor_create(ANCHOR_SHAPES, 2, dims_create_anchor, TL_FLOAT);
      tl_tensor *all_anchor_shapes = tl_tensor_repeat(anchor_shapes, CONVOUT_H*CONVOUT_W);
      int dims_reshape_anchor[] = {CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,2};
      tl_tensor_reshape_src(all_anchor_shapes, 4, dims_reshape_anchor);
