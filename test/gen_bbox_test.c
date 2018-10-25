@@ -16,7 +16,6 @@ int main(int argc, char **argv)
 {
      int num_ele = CONVOUT_C*CONVOUT_H*CONVOUT_W;
      float feature_float[CONVOUT_C*CONVOUT_H*CONVOUT_W] = {0};
-     int16_t feature_i16[CONVOUT_C*CONVOUT_H*CONVOUT_W] = {0};
      float bbox[4];
      const char *file;
      char *filecp, cmd[100];
@@ -63,7 +62,6 @@ int main(int argc, char **argv)
 
      for (i = 0; i < num_ele; i++) {
           fscanf(fp, "%f", &feature_float[i]);
-          feature_i16[i] = (int16_t)feature_float[i];
      }
      fclose(fp);
 
@@ -77,7 +75,7 @@ int main(int argc, char **argv)
 
      tensors = gb_preprocess();
      start = clock();
-     gb_getbbox(feature_i16, img_w, img_h, tensors, bbox);
+     gb_getbbox(feature_float, img_w, img_h, tensors, bbox);
      end = clock();
      gb_postprocess(tensors);
 

@@ -10,7 +10,7 @@ GB_CPPSTART
 #endif
 
 struct pre_alloc_tensors *gb_preprocess(void);
-void gb_getbbox(int16_t *feature, int img_width, int img_height,
+void gb_getbbox(float *feature, int img_width, int img_height,
                 struct pre_alloc_tensors *tensors, float *result);
 void gb_postprocess(struct pre_alloc_tensors *tensors);
 

@@ -33,7 +33,7 @@ struct pre_alloc_tensors {
      tl_tensor *feature;
      tl_tensor *conf_feature, *bbox_feature;
      tl_tensor *conf_max, *conf_maxidx;
-     tl_tensor *bbox_int16, *bbox_float, *anchor;
+     tl_tensor *bbox_float, *anchor;
      int volumn_slice_feature;
 };
 
@@ -43,17 +43,15 @@ struct pre_alloc_tensors *gb_preprocess(void)
 
      tensors = (struct pre_alloc_tensors *)tl_alloc(sizeof(struct pre_alloc_tensors));
      int dims_feature[] = {CONVOUT_C,CONVOUT_H,CONVOUT_W};
-     tensors->feature = tl_tensor_create(NULL, 3, dims_feature, TL_INT16);
+     tensors->feature = tl_tensor_create(NULL, 3, dims_feature, TL_FLOAT);
      int dims_conf_feature[] = {CONF_SLICE_C,CONVOUT_H,CONVOUT_W};
-     tensors->conf_feature = tl_tensor_create(NULL, 3, dims_conf_feature, TL_INT16);
+     tensors->conf_feature = tl_tensor_create(NULL, 3, dims_conf_feature, TL_FLOAT);
      int dims_bbox_feature[] = {BBOX_SLICE_C,CONVOUT_H,CONVOUT_W};
-     tensors->bbox_feature = tl_tensor_create(NULL, 3, dims_bbox_feature, TL_INT16);
+     tensors->bbox_feature = tl_tensor_create(NULL, 3, dims_bbox_feature, TL_FLOAT);
      int dims_zeros_conf_max[] = {1};
-     tensors->conf_max = tl_tensor_zeros(1, dims_zeros_conf_max, TL_INT16);
+     tensors->conf_max = tl_tensor_zeros(1, dims_zeros_conf_max, TL_FLOAT);
      int dims_zeros_conf_maxidx[] = {1};
      tensors->conf_maxidx = tl_tensor_zeros(1, dims_zeros_conf_maxidx, TL_INT32);
-     int dims_zeros_bbox_int16[] = {1,4};
-     tensors->bbox_int16 = tl_tensor_zeros(2, dims_zeros_bbox_int16, TL_INT16);
      int dims_zeros_bbox_float[] = {1,4};
      tensors->bbox_float = tl_tensor_zeros(2, dims_zeros_bbox_float, TL_FLOAT);
      int dims_zeros_anchor[] = {1,4};
@@ -115,7 +113,6 @@ void gb_postprocess(struct pre_alloc_tensors *tensors)
      tl_tensor_free(tensors->conf_feature);
      tl_tensor_free_data_too(tensors->conf_max);
      tl_tensor_free_data_too(tensors->conf_maxidx);
-     tl_tensor_free_data_too(tensors->bbox_int16);
      tl_tensor_free_data_too(tensors->bbox_float);
      tl_tensor_free_data_too(tensors->anchor);
      tl_tensor_free(tensors->feature);
@@ -155,12 +152,12 @@ static void transform_bbox(float *bbox_delta, float *anchor, float *result,
      result[3] = ymax;
 }
 
-void gb_getbbox(int16_t *feature, int img_width, int img_height,
+void gb_getbbox(float_t *feature, int img_width, int img_height,
                 struct pre_alloc_tensors *tensors, float *result)
 {
      tensors->feature->data = feature;
-     tensors->conf_feature->data = &((int16_t*)tensors->feature->data)[CLASS_SLICE_C*tensors->volumn_slice_feature];
-     tensors->bbox_feature->data = &((int16_t*)tensors->feature->data)[(CLASS_SLICE_C+CONF_SLICE_C)*tensors->volumn_slice_feature];
+     tensors->conf_feature->data = &((float_t*)tensors->feature->data)[CLASS_SLICE_C*tensors->volumn_slice_feature];
+     tensors->bbox_feature->data = &((float_t*)tensors->feature->data)[(CLASS_SLICE_C+CONF_SLICE_C)*tensors->volumn_slice_feature];
      int dims_reshape_bbox[] = {ANCHORS_PER_GRID,4,CONVOUT_H,CONVOUT_W};
      tl_tensor_reshape_src(tensors->bbox_feature, 4, dims_reshape_bbox);
 
@@ -173,7 +170,7 @@ void gb_getbbox(int16_t *feature, int img_width, int img_height,
      int coords[4], index, coords_anchor[4];
      tl_tensor_coords(tensors->conf_feature, *(int32_t*)tensors->conf_maxidx->data, coords);
      index = tl_tensor_index(tensors->bbox_feature, coords);
-     ((int16_t*)tensors->bbox_int16->data)[0] = ((int16_t*)tensors->bbox_feature->data)[index];
+     ((float_t*)tensors->bbox_float->data)[0] = ((float_t*)tensors->bbox_feature->data)[index];
      coords_anchor[0] = coords[2];
      coords_anchor[1] = coords[3];
      coords_anchor[2] = coords[0];
@@ -183,7 +180,7 @@ void gb_getbbox(int16_t *feature, int img_width, int img_height,
 
      coords[1] += 1;
      index = tl_tensor_index(tensors->bbox_feature, coords);
-     ((int16_t*)tensors->bbox_int16->data)[1] = ((int16_t*)tensors->bbox_feature->data)[index];
+     ((float_t*)tensors->bbox_float->data)[1] = ((float_t*)tensors->bbox_feature->data)[index];
      coords_anchor[0] = coords[2];
      coords_anchor[1] = coords[3];
      coords_anchor[2] = coords[0];
@@ -193,7 +190,7 @@ void gb_getbbox(int16_t *feature, int img_width, int img_height,
 
      coords[1] += 1;
      index = tl_tensor_index(tensors->bbox_feature, coords);
-     ((int16_t*)tensors->bbox_int16->data)[2] = ((int16_t*)tensors->bbox_feature->data)[index];
+     ((float_t*)tensors->bbox_float->data)[2] = ((float_t*)tensors->bbox_feature->data)[index];
      coords_anchor[0] = coords[2];
      coords_anchor[1] = coords[3];
      coords_anchor[2] = coords[0];
@@ -203,7 +200,7 @@ void gb_getbbox(int16_t *feature, int img_width, int img_height,
 
      coords[1] += 1;
      index = tl_tensor_index(tensors->bbox_feature, coords);
-     ((int16_t*)tensors->bbox_int16->data)[3] = ((int16_t*)tensors->bbox_feature->data)[index];
+     ((float_t*)tensors->bbox_float->data)[3] = ((float_t*)tensors->bbox_feature->data)[index];
      coords_anchor[0] = coords[2];
      coords_anchor[1] = coords[3];
      coords_anchor[2] = coords[0];
@@ -211,6 +208,5 @@ void gb_getbbox(int16_t *feature, int img_width, int img_height,
      index = tl_tensor_index(tensors->anchors, coords_anchor);
      ((float*)tensors->anchor->data)[3] = ((float*)tensors->anchors->data)[index];
 
-     tl_tensor_convert(tensors->bbox_int16, tensors->bbox_float, TL_FLOAT);
-     transform_bbox((float*)tensors->bbox_int16->data, (float*)tensors->anchor->data, result, img_width, img_height);
+     transform_bbox((float*)tensors->bbox_float->data, (float*)tensors->anchor->data, result, img_width, img_height);
 }
