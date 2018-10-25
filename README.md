@@ -16,7 +16,7 @@ Copy `gen_bbox.h` and `gen_bbox.c` in your project to use the functions.
 ```
 #include "gen_bbox.h"
 
-int16_t *feature_map;
+float *feature_map;
 int img_width, img_height; /* original image size */
 float bbox[4]; /* bounding box */
 struct pre_alloc_tensors *tensors;
