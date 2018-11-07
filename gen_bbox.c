@@ -73,7 +73,7 @@ struct pre_alloc_tensors *gb_preprocess(void)
      int dims_reshape_center_x[] = {ANCHORS_PER_GRID,CONVOUT_H,CONVOUT_W};
      tl_tensor_reshape_src(center_x_input_all, 3, dims_reshape_center_x);
      int dims_trans_center_x[] = {1,2,0};
-     tl_tensor *center_x_input_all_trans = tl_tensor_transpose(center_x_input_all, NULL, dims_trans_center_x, NULL);
+     tl_tensor *center_x_input_all_trans = tl_tensor_transpose(center_x_input_all, NULL, dims_trans_center_x);
      int dims_reshape_center_x_trans[] = {CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1};
      tl_tensor_reshape_src(center_x_input_all_trans, 4, dims_reshape_center_x_trans);
 
@@ -83,7 +83,7 @@ struct pre_alloc_tensors *gb_preprocess(void)
      int dims_reshape_center_y[] = {ANCHORS_PER_GRID,CONVOUT_W,CONVOUT_H};
      tl_tensor_reshape_src(center_y_input_all, 3, dims_reshape_center_y);
      int dims_trans_center_y[] = {2,1,0};
-     tl_tensor *center_y_input_all_trans = tl_tensor_transpose(center_y_input_all, NULL, dims_trans_center_y, NULL);
+     tl_tensor *center_y_input_all_trans = tl_tensor_transpose(center_y_input_all, NULL, dims_trans_center_y);
      int dims_reshape_center_y_trans[] = {CONVOUT_H,CONVOUT_W,ANCHORS_PER_GRID,1};
      tl_tensor_reshape_src(center_y_input_all_trans, 4, dims_reshape_center_y_trans);
 
