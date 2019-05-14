@@ -74,7 +74,7 @@ CLASS_NAMES = ["person", "car", "riding", "boat", "drone", "truck", "parachute",
 
 E = 2.718281828
 
-def parse_tensor_str(tensor_str, data_type=float):
+def parse_tensor_str(tensor_str, data_type=np.float32):
     strre = r'(?<=\d)(?=\s)'
     parsed_str = re.sub(strre, ',', tensor_str)
     strre = r'\](\s*)\['
@@ -141,7 +141,6 @@ def feature_express_c(feature_map, img_width, img_height):
     bbox[1] = result[1]
     bbox[2] = result[2]
     bbox[3] = result[3]
-    print ("predict:")
     print bbox
     print ("time: %.3fms"%((end - start)*1000))
     return bbox
@@ -150,7 +149,7 @@ def test_with_file(filename, img_width, img_height):
     try:
         fo = open(filename)
         fstr = fo.read()
-        tensor = parse_tensor_str(fstr, data_type=np.int16)
+        tensor = parse_tensor_str(fstr)
     except IOError:
         print ("No such file: " + filename)
     finally:

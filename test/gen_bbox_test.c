@@ -79,7 +79,7 @@ int main(int argc, char **argv)
      end = clock();
      gb_postprocess(tensors);
 
-     printf("predict:\n[ ");
+     printf("[ ");
      for (i = 0; i < 4; i++) {
           printf("%.2f ", bbox[i]);
      }
