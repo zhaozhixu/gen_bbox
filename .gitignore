@@ -6,3 +6,4 @@
 *.data
 *.old
 test/gen_bbox_test
+G*

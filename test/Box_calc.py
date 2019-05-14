@@ -30,6 +30,7 @@ OrgDxywh = np.zeros([H0,W_full,36]) #make a np to save dx,dy,dh,dw
 Readin = np.loadtxt('test.txt',delimiter='\t') #read txt for test
 tmp =Readin.astype(np.int8) #convert to int8
 
+start=time.time()
 Orgtemp = tmp.reshape(H0, Wpergroup, Cgroups, Wgroups, Cpergroup)  # cnvert input to a suitable np  ,C=45
 OrgOuttmp = Orgtemp.transpose(0, 3, 1, 2, 4)
 OrgOut = OrgOuttmp.reshape(H0, W_full, C_full)
@@ -49,7 +50,9 @@ anchorindex = maxindex - Windex * 9
 [Xhwk, Yhwk] = org_xy[Hindex, Windex]  # get the center (x,y) of the block weget according to the maxindex
 [Whwk, Hhwk] = org_wh[anchorindex]  # get the anchor-size of the anchor we get according to the maxindex
 [dx, dy, dw, dh] = Dxywh[Hindex, Windex, anchorindex,] / 4  # Divided by a coefficient"4" to get (dx,dy,dw,dh)
-
+print(Dxywh[Hindex, Windex, anchorindex,])
+print([Xhwk, Yhwk, Whwk, Hhwk])
+print([dx, dy, dw, dh])
 X = Xhwk + Whwk * dx
 Y = Yhwk + Hhwk * dy  # the center(x,y) of the baouning box
 W = Whwk * safe_exp(dw)  # the width of the bounding box
@@ -68,5 +71,7 @@ if Ymin < 0:
 if Ymax > 359:
     Ymax = 359
 # timer stop after PS has received image
+end = time.time()
 
 print(Xmin,Xmax,Ymin,Ymax)     ####输出计算结果
+print ("time: %.3fms"%((end - start)*1000))
