@@ -14,7 +14,7 @@ test:
 	@echo "Python test result:"
 	@python test/gen_bbox_test.py test/test.txt
 	@echo "C test result:"
-	@test/gen_bbox_test test/test.txt
+	@LD_LIBRARY_PATH=. test/gen_bbox_test test/test.txt
 
 clean:
 	rm -f libgen_bbox_dpu.so test/gen_bbox_test

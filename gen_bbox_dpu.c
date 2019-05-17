@@ -181,10 +181,10 @@ void gbd_getbbox(struct pre_alloc_data *data, int8_t *feature, float *anchors,
     float anchor[4];
 
     max_id = find_max_index(data, feature);
-    bbox_delta[0] = feature[data->bbox_indexes[max_id*BBOX_SIZE]];
-    bbox_delta[1] = feature[data->bbox_indexes[max_id*BBOX_SIZE+1]];
-    bbox_delta[2] = feature[data->bbox_indexes[max_id*BBOX_SIZE+2]];
-    bbox_delta[3] = feature[data->bbox_indexes[max_id*BBOX_SIZE+3]];
+    bbox_delta[0] = feature[data->bbox_indexes[max_id * BBOX_SIZE]];
+    bbox_delta[1] = feature[data->bbox_indexes[max_id * BBOX_SIZE + 1]];
+    bbox_delta[2] = feature[data->bbox_indexes[max_id * BBOX_SIZE + 2]];
+    bbox_delta[3] = feature[data->bbox_indexes[max_id * BBOX_SIZE + 3]];
 
     out_index_to_hwc(data->conf_indexes[max_id], hwc);
     anchor_id = get_index(hwc, 3, (int[]){H_VALID, W_VALID, ANCHORS_PER_GRID});

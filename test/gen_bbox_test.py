@@ -44,23 +44,23 @@ lib_data = None
 result = None
 bbox = None
 def init():
-  global anchors, lib, lib_data, result, bbox
-  anchors = prepare_anchors(ANCHOR_SHAPE, IMG_W, IMG_H, W_VALID,
-                            H_VALID, ANCHORS_PER_GRID)
-  lib = CDLL("libgen_bbox_dpu.so")
-  lib_data = lib.gbd_preprocess()
-  result = (c_float*4)()
+    global anchors, lib, lib_data, result, bbox
+    anchors = prepare_anchors(ANCHOR_SHAPE, IMG_W, IMG_H, W_VALID,
+                              H_VALID, ANCHORS_PER_GRID)
+    lib = CDLL("./libgen_bbox_dpu.so")
+    lib_data = lib.gbd_preprocess()
+    result = (c_float*4)()
 
 def detect(feature):
-  global anchors, lib, lib_data, result, bbox
-  lib.gbd_getbbox(lib_data, feature.ctypes.data_as(c_void_p),
-                  anchors.ctypes.data_as(c_void_p),
-                  result)
-  return [result[0], result[1], result[2], result[3]]
+    global anchors, lib, lib_data, result, bbox
+    lib.gbd_getbbox(lib_data, feature.ctypes.data_as(c_void_p),
+                    anchors.ctypes.data_as(c_void_p),
+                    result)
+    return [result[0], result[1], result[2], result[3]]
 
 def cleanup():
-  global lib_data
-  lib.gbd_postprocess(lib_data)
+    global lib_data
+    lib.gbd_postprocess(lib_data)
 
 init()
 filename = sys.argv[1]

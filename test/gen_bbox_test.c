@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../gen_bbox_gpu.h"
+#include "../gen_bbox_dpu.h"
 
 static const int C_FULL = 48;
 static const int W_FULL = 24;
